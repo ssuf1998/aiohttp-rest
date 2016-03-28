@@ -1,0 +1,7 @@
+include README.rst
+include LICENSE
+
+graft tests
+
+global-exclude *.pyc
+global-exclude */__pycache__
