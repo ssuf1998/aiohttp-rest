@@ -1,5 +1,7 @@
 include README.rst
 include LICENSE
+include requirements.txt
+include build-requirements.txt
 
 graft tests
 
