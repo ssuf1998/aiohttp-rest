@@ -1,6 +1,7 @@
 from asyncio import coroutine
 
 import pytest
+from aiohttp import HttpBadRequest
 from fluentmock import create_mock
 
 from aiohttp_rest.endpoint import RestEndpoint
@@ -44,8 +45,8 @@ async def test_dispatch_uses_correct_handler_for_verb(endpoint: RestEndpoint):
     endpoint.register_method('VERB1', coroutine(lambda: 5))
     endpoint.register_method('VERB2', coroutine(lambda: 17))
 
-    assert await endpoint.dispatch(create_mock(method='VERB1')) == 5
-    assert await endpoint.dispatch(create_mock(method='VERB2')) == 17
+    assert await endpoint.dispatch(create_mock(method='VERB1', match_info={})) == 5
+    assert await endpoint.dispatch(create_mock(method='VERB2', match_info={})) == 17
 
 
 @pytest.mark.asyncio
@@ -62,3 +63,12 @@ async def test_dispatch_passes_match_info_when_required(endpoint: RestEndpoint):
     request = create_mock(method='MATCH_INFO', match_info={'prop1': 1, 'prop2': 2})
 
     assert await endpoint.dispatch(request) == (2, 1)
+
+
+@pytest.mark.asyncio
+async def test_dispatch_raises_bad_request_when_match_info_does_not_exist(endpoint: RestEndpoint):
+    endpoint.register_method('BAD_MATCH_INFO', coroutine(lambda no_match: no_match))
+    request = create_mock(method='BAD_MATCH_INFO', match_info={})
+
+    with pytest.raises(HttpBadRequest):
+        await endpoint.dispatch(request)
