@@ -1,8 +1,10 @@
 import json
 from collections import OrderedDict
 
+from aiohttp import HttpBadRequest
 from aiohttp.web import Response
 from aiohttp.web_urldispatcher import UrlDispatcher
+
 from .endpoint import RestEndpoint
 
 
@@ -11,7 +13,7 @@ class CollectionEndpoint(RestEndpoint):
         super().__init__()
         self.resource = resource
 
-    async def get(self):
+    async def get(self) -> Response:
         data = []
         for instance in self.resource.collection.values():
             data.append(self.resource.render(instance))
@@ -20,6 +22,9 @@ class CollectionEndpoint(RestEndpoint):
 
     async def post(self, request):
         data = await request.json()
+        if self.resource.id_field in data.keys():
+            raise HttpBadRequest("{id_field} is defined in the payload, use PUT on /{name}/{id} instead".format(
+                id_field=self.resource.id_field, name=self.resource.name, id=data[self.resource.id_field]))
         instance = self.resource.factory(**data)
         self.resource.collection[getattr(instance, self.resource.id_field)] = instance
         new_url = '/{name}/{id}'.format(name=self.resource.name, id=getattr(instance, self.resource.id_field))
@@ -73,10 +78,10 @@ class PropertyEndpoint(RestEndpoint):
 
 
 class RestResource:
-    def __init__(self, name, collection, factory, properties, id_field):
+    def __init__(self, name, factory, collection, properties, id_field):
         self.name = name
-        self.collection = collection
         self.factory = factory
+        self.collection = collection
         self.properties = properties
         self.id_field = id_field
 
@@ -98,4 +103,4 @@ class RestResource:
         return json.dumps(data, indent=4).encode('utf-8')
 
     def render_and_encode(self, instance):
-        return RestResource.encode(self.render(instance))
+        return self.encode(self.render(instance))
