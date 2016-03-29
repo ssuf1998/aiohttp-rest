@@ -3,6 +3,7 @@ sudo: no
 matrix:
     include:
         - os: linux
+          language: python
           python: 3.5
         - os: osx
           language: generic
