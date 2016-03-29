@@ -1,6 +1,9 @@
 aiohttp_rest
 ============
 
+.. image:: https://travis-ci.org/atbentley/aiohttp-rest.svg?branch=master
+  :target:  https://travis-ci.org/atbentley/aiohttp-rest
+
 aiohttp_rest makes it easy to create RESTful aiohttp endpoints that bind directly to models with minimal modification.
 
 Usage
