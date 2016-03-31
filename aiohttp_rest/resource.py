@@ -38,7 +38,9 @@ class InstanceEndpoint(RestEndpoint):
         self.resource = resource
 
     async def get(self, instance_id):
-        instance = self.resource.collection[instance_id]
+        instance = self.resource.collection.get(instance_id)
+        if not instance:
+            return Response(status=404)
         data = self.resource.render_and_encode(instance)
         return Response(status=200, body=data, content_type='application/json')
 
@@ -51,6 +53,8 @@ class InstanceEndpoint(RestEndpoint):
                         content_type='application/json')
 
     async def delete(self, instance_id):
+        if instance_id not in self.resource.collection.keys():
+            return Response(status=404)
         self.resource.collection.pop(instance_id)
         return Response(status=204)
 

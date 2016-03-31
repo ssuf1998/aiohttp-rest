@@ -1,5 +1,4 @@
 import json
-import uuid
 from asyncio import coroutine
 
 import pytest
@@ -8,34 +7,7 @@ from fluentmock import create_mock
 
 from aiohttp_rest.resource import CollectionEndpoint, RestResource
 
-
-class Model:
-    def __init__(self, name, age, id=None):
-        if id is None:
-            id = uuid.uuid4().hex
-        self.id = id
-        self.name = name
-        self.age = age
-
-
-@pytest.fixture
-def model_1():
-    return Model('george', 24)
-
-
-@pytest.fixture
-def model_2():
-    return Model('william', 25)
-
-
-@pytest.fixture
-def models(model_1, model_2):
-    return {model_1.id: model_1, model_2.id: model_2}
-
-
-@pytest.fixture
-def resource(models):
-    return RestResource('people', Model, models, ('id', 'name', 'age'), 'id')
+from .fixtures import model_1, model_2, models, resource
 
 
 @pytest.fixture
@@ -45,7 +17,7 @@ def endpoint(resource: RestResource):
 
 @pytest.fixture
 def empty_endpoint():
-    return CollectionEndpoint(RestResource('people', Model, {}, ('id', 'name', 'age'), 'id'))
+    return CollectionEndpoint(RestResource('people', None, {}, ('id', 'name', 'age'), 'id'))
 
 
 @pytest.mark.asyncio
