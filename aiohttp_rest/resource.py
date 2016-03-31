@@ -65,20 +65,19 @@ class PropertyEndpoint(RestEndpoint):
         self.resource = resource
 
     async def get(self, instance_id, property_name):
+        if instance_id not in self.resource.collection.keys() or property_name not in self.resource.properties:
+            return Response(status=404)
         instance = self.resource.collection[instance_id]
         value = getattr(instance, property_name)
         return Response(status=200, body=self.resource.encode({property_name: value}), content_type='application/json')
 
     async def put(self, request, instance_id, property_name):
+        if instance_id not in self.resource.collection.keys() or property_name not in self.resource.properties:
+            return Response(status=404)
         value = (await request.json())[property_name]
         instance = self.resource.collection[instance_id]
         setattr(instance, property_name, value)
         return Response(status=200, body=self.resource.encode({property_name: value}), content_type='application/json')
-
-    async def delete(self, instance_id, property_name):
-        instance = self.resource.collection[instance_id]
-        setattr(instance, property_name, None)
-        return Response(status=204)
 
 
 class RestResource:

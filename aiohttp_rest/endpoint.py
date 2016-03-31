@@ -22,7 +22,7 @@ class RestEndpoint:
     async def dispatch(self, request: Request):
         method = self.methods.get(request.method.upper())
         if not method:
-            return HttpMethodNotAllowed()
+            raise HttpMethodNotAllowed()
 
         wanted_args = list(inspect.signature(method).parameters.keys())
         available_args = request.match_info.copy()

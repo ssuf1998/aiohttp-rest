@@ -6,9 +6,8 @@ aiohttp_rest makes it easy to create RESTful aiohttp endpoints that bind directl
 .. image:: https://travis-ci.org/atbentley/aiohttp-rest.svg?branch=master
   :target:  https://travis-ci.org/atbentley/aiohttp-rest
 
-
-.. image:: https://coveralls.io/repos/atbentley/aiohttp_rest/badge.svg?branch=master&service=github
-  :target:  https://coveralls.io/github/atbentley/aiohttp_rest?branch=master
+.. image:: https://coveralls.io/repos/github/atbentley/aiohttp-rest/badge.svg?branch=master
+  :target: https://coveralls.io/github/atbentley/aiohttp-rest?branch=master
 
 Usage
 -----

@@ -1,7 +1,7 @@
 from asyncio import coroutine
 
 import pytest
-from aiohttp import HttpBadRequest
+from aiohttp import HttpBadRequest, HttpMethodNotAllowed
 from fluentmock import create_mock
 
 from aiohttp_rest.endpoint import RestEndpoint
@@ -71,4 +71,12 @@ async def test_dispatch_raises_bad_request_when_match_info_does_not_exist(endpoi
     request = create_mock(method='BAD_MATCH_INFO', match_info={})
 
     with pytest.raises(HttpBadRequest):
+        await endpoint.dispatch(request)
+
+
+@pytest.mark.asyncio
+async def test_dispatch_raises_method_not_allowed_when_verb_not_matched(endpoint: RestEndpoint):
+    request = create_mock(method='NO_METHOD')
+
+    with pytest.raises(HttpMethodNotAllowed):
         await endpoint.dispatch(request)
