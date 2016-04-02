@@ -10,7 +10,7 @@ def read(path):
 
 
 _version_re = re.compile(r'\s*__version__\s*=\s*\'(.*)\'\s*')
-version = _version_re.findall(read('aiohttp_rest/__init__.py'))[0]
+version = _version_re.findall(read('aiohttp_rest.py'))[0]
 
 
 install_requires = read('requirements.txt').split('\n')
@@ -26,7 +26,7 @@ setup(
     author_email='andrew.t.bentley@gmail.com',
     description='RESTful endpoints for aoihttp that bind directly to a model',
     long_description=read('README.rst'),
-    packages=['aiohttp_rest'],
+    py_modules=['aiohttp_rest'],
     include_package_data=True,
     zip_safe=False,
     platforms='any',
@@ -40,6 +40,7 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3 :: Only',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ]

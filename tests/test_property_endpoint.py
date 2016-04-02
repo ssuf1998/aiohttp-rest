@@ -4,7 +4,8 @@ from asyncio import coroutine
 import pytest
 from fluentmock import create_mock
 
-from aiohttp_rest.resource import PropertyEndpoint, RestResource
+from aiohttp_rest import PropertyEndpoint, RestResource
+
 from .fixtures import resource, Model, model_1, model_2, models
 
 

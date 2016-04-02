@@ -5,7 +5,7 @@ import pytest
 from aiohttp import HttpBadRequest
 from fluentmock import create_mock
 
-from aiohttp_rest.resource import CollectionEndpoint, RestResource
+from aiohttp_rest import CollectionEndpoint, RestResource
 
 from .fixtures import model_1, model_2, models, resource
 

@@ -4,7 +4,7 @@ import pytest
 from aiohttp import HttpBadRequest, HttpMethodNotAllowed
 from fluentmock import create_mock
 
-from aiohttp_rest.endpoint import RestEndpoint
+from aiohttp_rest import RestEndpoint
 
 
 class CustomEndpoint(RestEndpoint):
