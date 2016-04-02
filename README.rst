@@ -1,7 +1,7 @@
-aiohttp_rest
+aiohttp-rest
 ============
 
-aiohttp_rest makes it easy to create RESTful aiohttp endpoints that bind directly to models with minimal modification.
+aiohttp-rest makes it easy to create RESTful aiohttp endpoints that bind directly to models with minimal modification.
 
 .. image:: https://travis-ci.org/atbentley/aiohttp-rest.svg?branch=master
   :target:  https://travis-ci.org/atbentley/aiohttp-rest
@@ -34,7 +34,7 @@ Create an aiohttp application that makes use of a ``aiohttp_rest.RestResource``:
   people = {}
 
   app = Application()
-  person_resource = RestResource('people', people, Person, ('name', 'age'), 'name')
+  person_resource = RestResource('people', Person, people, ('name', 'age'), 'name')
   person_resource.register(app.router)
 
   run_app(app)
@@ -43,10 +43,10 @@ Interact with the API:
 
 .. code-block:: bash
 
-  http POST localhost:8000/people name=andrew age=24
-  http localhost:8000/people/andrew
-  http PUT localhost:8000/people/andrew/age age=25
-  http DELETE localhost:8000/people/andrew
+  http PUT localhost:8080/people/andrew age=24
+  http localhost:8080/people/andrew
+  http PUT localhost:8080/people/andrew/age age=25
+  http DELETE localhost:8080/people/andrew
 
 Several things are required by the ``RestResource`` to make all this work:
 
@@ -59,19 +59,17 @@ Several things are required by the ``RestResource`` to make all this work:
 Installing
 ----------
 
-.. code-block::
+.. code-block:: bash
 
-  git clone github.com/atbentley/aiohttp_rest
-  cd aiohttp_rest
-  python setup.py install
+  pip install aiohttp-rest
 
 Tests
 -----
 
-.. code-block::
+.. code-block:: bash
 
   pip install -r build-requirements.txt
-  py.test tests
+  py.test --cov aiohttp_rest tests
 
 License
 -------
