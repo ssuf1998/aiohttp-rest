@@ -3,6 +3,8 @@
 ---
 aiohttp-rest makes it easy to create RESTful aiohttp endpoints that bind directly to models with minimal modification.
 
+⭐ Now support mongodb.
+
 ## Usage
 
 ---
