@@ -1,14 +1,13 @@
 import inspect
 import json
 from collections import OrderedDict
+from functools import wraps
 
-from aiohttp import HttpMethodNotAllowed, HttpBadRequest
+from aiohttp.web_exceptions import HTTPMethodNotAllowed, HTTPBadRequest
 from aiohttp.web import Request, Response
 from aiohttp.web_urldispatcher import UrlDispatcher
 
-
-__version__ = '0.1.0'
-
+__version__ = '0.1.2'
 
 DEFAULT_METHODS = ('GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'GET')
 
@@ -20,15 +19,15 @@ class RestEndpoint:
         for method_name in DEFAULT_METHODS:
             method = getattr(self, method_name.lower(), None)
             if method:
-                self.register_method(method_name, method)
-
-    def register_method(self, method_name, method):
-        self.methods[method_name.upper()] = method
+                self.methods[method_name.upper()] = method
 
     async def dispatch(self, request: Request):
         method = self.methods.get(request.method.upper())
         if not method:
-            raise HttpMethodNotAllowed()
+            raise HTTPMethodNotAllowed(
+                method=request.method.upper(),
+                allowed_methods=self.methods.keys()
+            )
 
         wanted_args = list(inspect.signature(method).parameters.keys())
         available_args = request.match_info.copy()
@@ -37,7 +36,7 @@ class RestEndpoint:
         unsatisfied_args = set(wanted_args) - set(available_args.keys())
         if unsatisfied_args:
             # Expected match info that doesn't exist
-            raise HttpBadRequest('')
+            raise HTTPBadRequest()
 
         return await method(**{arg_name: available_args[arg_name] for arg_name in wanted_args})
 
@@ -57,9 +56,17 @@ class CollectionEndpoint(RestEndpoint):
     async def post(self, request):
         data = await request.json()
         if self.resource.id_field in data.keys():
-            raise HttpBadRequest("{id_field} is defined in the payload, use PUT on /{name}/{id} instead".format(
-                id_field=self.resource.id_field, name=self.resource.name, id=data[self.resource.id_field]))
-        instance = self.resource.factory(**data)
+            raise HTTPBadRequest()
+            # raise HttpBadRequest("{id_field} is defined in the payload, use PUT on /{name}/{id} instead".format(
+            #     id_field=self.resource.id_field, name=self.resource.name, id=data[self.resource.id_field]))
+        try:
+            if self.resource.ignore_prop:
+                for _ in self.resource.ignore_prop:
+                    data[_] = None
+
+            instance = self.resource.factory(**data)
+        except TypeError:
+            return HTTPBadRequest()
         self.resource.collection[getattr(instance, self.resource.id_field)] = instance
         new_url = '/{name}/{id}'.format(name=self.resource.name, id=getattr(instance, self.resource.id_field))
         return Response(status=201, body=self.resource.render_and_encode(instance),
@@ -81,7 +88,14 @@ class InstanceEndpoint(RestEndpoint):
     async def put(self, request, instance_id):
         data = await request.json()
         data[self.resource.id_field] = instance_id
-        instance = self.resource.factory(**data)
+        try:
+            if self.resource.ignore_prop:
+                for _ in self.resource.ignore_prop:
+                    data[_] = None
+
+            instance = self.resource.factory(**data)
+        except TypeError:
+            return HTTPBadRequest()
         self.resource.collection[instance_id] = instance
         return Response(status=201, body=self.resource.render_and_encode(instance),
                         content_type='application/json')
@@ -115,12 +129,21 @@ class PropertyEndpoint(RestEndpoint):
 
 
 class RestResource:
-    def __init__(self, name, factory, collection, properties, id_field):
+    def __init__(self, name, factory, collection):
         self.name = name
         self.factory = factory
         self.collection = collection
-        self.properties = properties
-        self.id_field = id_field
+
+        self.ignore_prop = None
+        temp_prop = list(inspect.signature(factory.__init__).parameters.keys())[1:]
+        if 'ignore_prop' in dir(factory.__init__):
+            self.ignore_prop = factory.__init__.ignore_prop
+            for _ in factory.__init__.ignore_prop:
+                temp_prop.remove(_)
+        assert len(temp_prop) >= 1, 'Must include at least one arg for id'
+
+        self.properties = tuple(temp_prop)
+        self.id_field = self.properties[0]
 
         self.collection_endpoint = CollectionEndpoint(self)
         self.instance_endpoint = InstanceEndpoint(self)
@@ -141,3 +164,17 @@ class RestResource:
 
     def render_and_encode(self, instance):
         return self.encode(self.render(instance))
+
+
+def ignore_prop(*args):
+    def _ignore_prop(func):
+        assert type(func).__name__ == 'type', 'Must wrap a class.'
+        setattr(func.__init__, 'ignore_prop', args)
+
+        @wraps(func)
+        def wrapper(*wrap_args, **wrap_kwargs):
+            return func(*wrap_args, **wrap_kwargs)
+
+        return wrapper
+
+    return _ignore_prop
