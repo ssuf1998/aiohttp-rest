@@ -21,10 +21,10 @@ happen, this property will be `None` in API.
 Just like this:
 
 ```python
-from aiohttp_rest import ignore_prop
+from aiohttp_rest import model
 
 
-@ignore_prop('ignore_me')
+@model(protect_prop=('ignore_me',))
 class Person:
     def __init__(self, name, age, ignore_me):
         self.name = name
@@ -54,6 +54,7 @@ person_resource.register(app.router)
 if __name__ == '__main__':
     run_app(app)
 ```
+You can take a look at `example.py` to learn more.
 
 Interact with the API:
 
